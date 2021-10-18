@@ -231,8 +231,10 @@ exit(int status)  //Before it was just exit(void), we change it to int status to
   struct proc *p;
   int fd;
 
+  curproc->exitstat = status;
+
   if(curproc == initproc)
-    panic("init exiting");
+   panic("init exiting");
 
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
