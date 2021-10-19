@@ -29,8 +29,7 @@ sys_wait(void)
 {
   int* status;
   
-  if(argptr(0,(void*)&status, sizeof(status))<0)
-    return -1;
+  argptr(0,(void*)&status, sizeof(status))
   return wait(status);
 }
 
