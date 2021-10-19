@@ -14,12 +14,12 @@ int main(int argc, char *argv[])
   
   if (atoi(argv[1]) == 1)
 	exitWait();
-  else if (atoi(argv[1]) == 2)
+ // else if (atoi(argv[1]) == 2)
 	waitPid();
-  else if (atoi(argv[1]) == 3)
+ // else if (atoi(argv[1]) == 3)
 	CELEBW02();
   else 
-   printf(1, "\ntype \"lab1 1\" to test exit and wait, \"lab1 2\" to test waitpid and \"lab1 3\" to test the extra credit WNOHANG option \n");
+   printf(1, "\ntype \"lab1_test\" to test exit and wait, \"lab1 2\" to test waitpid and \"lab1 3\" to test the extra credit WNOHANG option \n");
   
     // End of test
 	 exit(0);
