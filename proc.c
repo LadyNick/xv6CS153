@@ -251,6 +251,8 @@ exit(int status)  //Before it was just exit(void), we change it to int status to
 
   acquire(&ptable.lock);
 
+  curproc->exitstat = status;
+  
   // Parent might be sleeping in wait().
   wakeup1(curproc->parent);
 
@@ -288,6 +290,7 @@ wait(int* status)
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+        status* = p->exitstat;
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
