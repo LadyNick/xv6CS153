@@ -321,7 +321,7 @@ int
 waitpid(int pid, int* status, int options)
 {
   struct proc *p;
-  int havekids, newpid;
+  int havekids, pid;
   struct proc *curproc = myproc();
   
   acquire(&ptable.lock);
@@ -329,17 +329,17 @@ waitpid(int pid, int* status, int options)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != curproc)
+      if(p->pid != pid)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
 	     
-      if(status){
-	*status = p->status;
-      }
+        if(status){
+	   *status = p->status;
+        }
 	      
-        newpid = p->pid;
+        pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -351,7 +351,7 @@ waitpid(int pid, int* status, int options)
 	if(status) *status = p->exitstat;
 	p->exitstat = 0;
         release(&ptable.lock);
-        return newpid;
+        return pid;
       }
    
       else if (options == WNOHANG) {
@@ -365,6 +365,7 @@ waitpid(int pid, int* status, int options)
       }
     }
     }
+}
 
     // No point waiting if we don't have any children.
     if(!havekids || curproc->killed){
