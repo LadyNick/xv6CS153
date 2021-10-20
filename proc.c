@@ -320,8 +320,8 @@ wait(int* status)
 int
 waitpid(int pid, int* status, int options)
 {
-  struct proc *p;
-  int havekids, pid;
+  struct proc *p = myproc();
+  int havekids;
   struct proc *curproc = myproc();
   
   acquire(&ptable.lock);
@@ -333,13 +333,7 @@ waitpid(int pid, int* status, int options)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
-        // Found one.
-	     
-        if(status){
-	   *status = p->status;
-        }
-	      
-        pid = p->pid;
+        // Found one
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -353,19 +347,11 @@ waitpid(int pid, int* status, int options)
         release(&ptable.lock);
         return pid;
       }
-   
-      else if (options == WNOHANG) {
-	if(curproc->status >= 0) {
-	   release(&ptable.lock);
-	   return curproc->status;
+	else if(options == 1) {
+		release(&ptable.lock); 
+		return 0;
 	}
-	else {
-	   return -1;
-	}
-      }
     }
-    }
-}
 
     // No point waiting if we don't have any children.
     if(!havekids || curproc->killed){
@@ -377,7 +363,6 @@ waitpid(int pid, int* status, int options)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
 }
-
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
