@@ -34,6 +34,18 @@ sys_wait(void)
 }
 
 int
+sys_waitpid(void)
+{
+  int pid = 0;
+  int options = 0;
+  int* status;
+  if(argint(0, &pid) < 0) return -1;
+  if(argptr(1, (void*)&status, sizeof(status)) < 0) return - 1;
+  if (argint(2, &optionS) < 0) return -1;
+  return waitpid(pid, status, options);
+}
+
+int
 sys_kill(void)
 {
   int pid;
