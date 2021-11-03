@@ -378,16 +378,21 @@ waitpid(int pid, int* status, int options)
   }
 } 
 /*
-// Lab 2 Priority Scheduler
-// 0 is highest priority, 31 is lowest priority
+//PAGEBREAK: 42
+// Per-CPU process scheduler.
+// Each CPU calls scheduler() after setting itself up.
+// Scheduler never returns.  It loops, doing:
+//  - choose a process to run
+//  - swtch to start running that process
+//  - eventually that process transfers control
+//      via swtch back to the scheduler.
 void
 scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
-  struct proc* highestProc;
+  struct proc* highestpri;
   
   for(;;){
     // Enable interrupts on this processor.
@@ -395,60 +400,42 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    //Now that we have access to the table holding all the processes, we want to look for 
+    //the one with the highest priority, so for now we'll sett the highest priority process
+    //to the first process in the table
+    highestpri = ptable.proc;
     
-    highestProc = ptable.proc;
     for (p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
-		if (p->state != RUNNABLE || p->priority > highestProc->priority) {
-			if (p->state == RUNNABLE) {
-				if (p->priority > 0) {
-					//setpriority(p->priority - 1);
-					p->priority--;
-				}
-			}
+		if (p->state != RUNNABLE) {
 			continue;
 		}
-		
-		if (p->priority <= highestProc->priority) {
-			highestProc = p;
-		}
-		else {
-			// make it higher priority
-			// make sure it doesnt go below 0
-			if (p->priority > 0) {
-				//setpriority(p->priority - 1);
-				p->priority--;
-			}
-			
-		}
-		
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+	    
+	//when it gets to here it means there is a runnable process found
+	//however we want the one with the highest priority to run first
+		if (p->priority <= highestpri->priority) {
+			highestpri = p;
+		}		
 	}
 	
-	if (highestProc->priority == 32) {
-		// no processes found within priority range
-		// error?
-	}
-	c->proc = highestProc;
-	switchuvm(highestProc); // what does this do?
-	highestProc->state = RUNNING;
+	//At this point it exits the for loop having gound the process w the highest priority
+	c->proc = highestpri;
+	switchuvm(highestpri); 
+	highestpri->state = RUNNING;
 	
-	// decrement the priority before running, so that during the next loop,
-	// it has lower priority (aging priorities)
-	//setpriority(highestProc->priority + 1);
-	highestProc->priority++; 
-	
-	swtch(&(c->scheduler), highestProc->context); // context switch
+	swtch(&(c->scheduler), highestpri->context);
 	switchkvm();
 	
 	// Process should be done running now
+        // It should have changed its p->state before coming back.
 	c->proc = 0;
-
-	
 	release(&ptable.lock);
-
   }
 }
-*/
 
+/*
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -504,7 +491,7 @@ scheduler(void)
       c->proc = 0; 
     release(&ptable.lock);
   }
-} 
+} */
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
