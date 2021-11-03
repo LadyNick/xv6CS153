@@ -376,8 +376,8 @@ waitpid(int pid, int* status, int options)
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
-}
-
+} 
+/*
 // Lab 2 Priority Scheduler
 // 0 is highest priority, 31 is lowest priority
 void
@@ -454,9 +454,8 @@ scheduler(void)
 
   }
 }
+*/
 
-
-/*
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -469,6 +468,7 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc* highestpri;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -476,6 +476,10 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
+    //Highest proc we will just make as the first process in the table,
+    //but then we'll compare until we find the highest priority process before running
+    highestpri = ptable.proc;
+	  
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -485,21 +489,30 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+	    
+	//when it gets to here it means there is a runnable process found
+	//however we want the one with the highest priority to run first
+      if(p->priority < highestpri->priority){
+	highestpri = p;     
+      }
+    }
+    //At this point it exits the for loop having gound the process w the highest priority	  
+	  
+      c->proc = highestpri;
+      switchuvm(highestpri);
+      highestpri->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
+      swtch(&(c->scheduler), highestpri->context);
       switchkvm();
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
-    }
+    }\
     release(&ptable.lock);
 
   }
-} */
+} 
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
