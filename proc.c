@@ -387,10 +387,6 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   
-  //struct proc testProc;
-  //testProc.priority = 32;
-  //struct proc* highestProc = &testProc;
-  
   struct proc* highestProc;
   
   for(;;){
@@ -401,9 +397,6 @@ scheduler(void)
     acquire(&ptable.lock);
     
     highestProc = ptable.proc;
-    
-    // new loop
-    // need nested loops? 
     for (p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
 		if (p->state != RUNNABLE || p->priority > highestProc->priority) {
 			if (p->state == RUNNABLE) {
@@ -475,13 +468,14 @@ scheduler(void)
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
+	  
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
     //Highest proc we will just make as the first process in the table,
     //but then we'll compare until we find the highest priority process before running
     highestpri = ptable.proc;
 	  
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
+	  
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE){
         continue;
@@ -507,9 +501,9 @@ scheduler(void)
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
+      c->proc = 0; 
     release(&ptable.lock);
+  }
 } 
 
 // Enter scheduler.  Must hold only ptable.lock
