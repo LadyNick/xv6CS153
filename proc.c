@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = 10;  //default priority for every process is 10
 
   release(&ptable.lock);
 
@@ -219,6 +220,19 @@ fork(void)
   release(&ptable.lock);
 
   return pid;
+}
+
+
+//LAB2 THIS FUNCTION SETS THE PRIORITY FOR WHEN THE PRIORITY SHOULD BE CHANGED
+int
+setpriority(int newpriority){
+
+  struct proc* curproc = myproc();
+  acquire(&ptable.lock);
+  curproc->priority = newpriority;
+  release(&ptable.lock);
+  return 0;
+
 }
 
 // Exit the current process.  Does not return.
