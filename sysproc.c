@@ -49,7 +49,7 @@ int
 sys_setpriority(void)
 {
   int p;
-  argint(0,&p)
+  argint(0,&p);
   return setpriority(p); 
 }
 
