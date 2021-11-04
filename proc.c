@@ -419,9 +419,9 @@ scheduler(void)
 		if (p->state != RUNNABLE) 
 			continue;
 	
-		if (p->priority < highestpri) {
+		if (p->priority < highestpri){ 
 			highestpri = p->priority;
-		}		
+		}
 	
     }
     
@@ -442,6 +442,7 @@ scheduler(void)
 	c->proc = 0;
     }
 	release(&ptable.lock);
+}
 }
 
 // Enter scheduler.  Must hold only ptable.lock
