@@ -242,7 +242,7 @@ setpriority(int newpriority){
   
   acquire(&ptable.lock);
   //curproc->priority = newpriority;
-  curproc()->state = RUNNABLE; //+
+  myproc()->state = RUNNABLE; //+
   sched(); //+
   release(&ptable.lock);
   return newpriority;
