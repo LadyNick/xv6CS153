@@ -406,7 +406,7 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  struct proc* highestpri;
+  int highestpri;
   
   for(;;){
     // Enable interrupts on this processor.
@@ -414,32 +414,34 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    highestpri = ptable.proc;
-    //Now that we have access to the table holding all the processes, we want to look for 
-    //the one with the highest priority, so for now we'll sett the highest priority process
-    //to the first process in the table
-    
-    
+    highestpri = 32;
     for (p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
 		if (p->state != RUNNABLE) 
 			continue;
 	
-		if (p->priority <= highestpri->priority) {
-			highestpri = p;
+		if (p->priority < highestpri) {
+			highestpri = p->priority;
 		}		
 	
     }
+    
+    for(p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
+	    if (p->state != RUNNABLE) 
+			continue;
 	
-	c->proc = highestpri;
-	switchuvm(highestpri); 
-	highestpri->state = RUNNING;
+	    if (p->priority > highestpri)
+			continue;
 	
-	swtch(&(c->scheduler), highestpri->context);
+	c->proc = p;
+	switchuvm(p); 
+	p->state = RUNNING;
+	
+	swtch(&(c->scheduler), p->context);
 	switchkvm();
     
 	c->proc = 0;
+    }
 	release(&ptable.lock);
-  }
 }
 
 // Enter scheduler.  Must hold only ptable.lock
