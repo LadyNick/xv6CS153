@@ -421,21 +421,15 @@ scheduler(void)
     
     
     for (p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
-		if (p->state != RUNNABLE) {
+		if (p->state != RUNNABLE) 
 			continue;
-		}
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-	    
-	//when it gets to here it means there is a runnable process found
-	//however we want the one with the highest priority to run first
+	
 		if (p->priority <= highestpri->priority) {
 			highestpri = p;
 		}		
 	
     }
-	//At this point it exits the for loop having gound the process w the highest priority
+	
 	c->proc = highestpri;
 	switchuvm(highestpri); 
 	highestpri->state = RUNNING;
@@ -443,9 +437,6 @@ scheduler(void)
 	swtch(&(c->scheduler), highestpri->context);
 	switchkvm();
     
-	
-	// Process should be done running now
-        // It should have changed its p->state before coming back.
 	c->proc = 0;
 	release(&ptable.lock);
   }
