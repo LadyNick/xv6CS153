@@ -400,10 +400,11 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    highestpri = ptable.proc;
     //Now that we have access to the table holding all the processes, we want to look for 
     //the one with the highest priority, so for now we'll sett the highest priority process
     //to the first process in the table
-    highestpri = ptable.proc;
+    
     
     for (p = ptable.proc; p< &ptable.proc[NPROC]; p++) {
 		if (p->state != RUNNABLE) {
@@ -419,7 +420,7 @@ scheduler(void)
 			highestpri = p;
 		}		
 	
-	
+    }
 	//At this point it exits the for loop having gound the process w the highest priority
 	c->proc = highestpri;
 	switchuvm(highestpri); 
@@ -427,7 +428,7 @@ scheduler(void)
 	
 	swtch(&(c->scheduler), highestpri->context);
 	switchkvm();
-    }
+    
 	
 	// Process should be done running now
         // It should have changed its p->state before coming back.
